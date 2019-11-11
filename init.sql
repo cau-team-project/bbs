@@ -14,7 +14,7 @@ DROP TABLE IF EXISTS `board`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `board` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(1024) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(128),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -30,7 +30,7 @@ CREATE TABLE `file` (
   `id` char(64) NOT NULL,
   `data` longblob NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `file` WRITE;
@@ -41,11 +41,13 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user` (
-  `id` varchar(128) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `uname` varchar(128) NOT NULL,
   `email` varchar(128) NOT NULL,
-  `password` varchar(64) NOT NULL,
-  `salt` varchar(64) NOT NULL,
+  `passwd` char(64) NOT NULL,
+  `salt` char(64) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY (`uname`)
   UNIQUE KEY (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
