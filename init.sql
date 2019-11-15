@@ -1,68 +1,92 @@
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-DROP TABLE IF EXISTS `board`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `board` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(128),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-LOCK TABLES `board` WRITE;
-/*!40000 ALTER TABLE `board` DISABLE KEYS */;
-/*!40000 ALTER TABLE `board` ENABLE KEYS */;
-UNLOCK TABLES;
-DROP TABLE IF EXISTS `file`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `file` (
-  `id` char(64) NOT NULL,
-  `data` longblob NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-LOCK TABLES `file` WRITE;
-/*!40000 ALTER TABLE `file` DISABLE KEYS */;
-/*!40000 ALTER TABLE `file` ENABLE KEYS */;
-UNLOCK TABLES;
-DROP TABLE IF EXISTS `user`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `uname` varchar(128) NOT NULL,
-  `email` varchar(128) NOT NULL,
-  `passwd` char(64) NOT NULL,
-  `salt` char(64) NOT NULL,
+CREATE TABLE user
+(
+  `id` INT NOT NULL,
+  `pw` CHAR(64) NOT NULL,
+  `salt` CHAR(64) NOT NULL,
+  `uname` VARCHAR(127) NOT NULL,
+  `bdate` DATE NOT NULL,
+  `fname` VARCHAR(127) NOT NULL,
+  `mname` VARCHAR(127) NOT NULL,
+  `lname` VARCHAR(127) NOT NULL,
+  `sex` ENUM('M','F'),
+  `email` VARCHAR(127) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY (`uname`)
-  UNIQUE KEY (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  UNIQUE (`uname`),
+  UNIQUE (`email`)
+);
 
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+CREATE TABLE file
+(
+  `id` CHAR(64) NOT NULL,
+  `type` VARCHAR(127) NOT NULL,
+  `content` LONGBLOB NOT NULL,
+  PRIMARY KEY (`id`)
+);
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+CREATE TABLE image
+(
+  `file_id` CHAR(64) NOT NULL,
+  PRIMARY KEY (`file_id`),
+  FOREIGN KEY (`file_id`) REFERENCES `file`(`id`)
+);
 
+CREATE TABLE board
+(
+  `name` VARCHAR(127) NOT NULL,
+  `id` INT NOT NULL,
+  `admin_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`admin_id`) REFERENCES `user`(`id`)
+);
+
+CREATE TABLE xref_board_mod
+(
+  `board_id` INT NOT NULL,
+  `mod_id` INT NOT NULL,
+  PRIMARY KEY (`board_id`, `mod_id`),
+  FOREIGN KEY (`board_id`) REFERENCES `board`(`id`),
+  FOREIGN KEY (`mod_id`) REFERENCES `user`(`id`)
+);
+
+CREATE TABLE article
+(
+  `id` INT NOT NULL,
+  `content` LONGTEXT NOT NULL,
+  `ctime` DATETIME NOT NULL,
+  `mtime` DATETIME NOT NULL,
+  `title` DATETIME NOT NULL,
+  `vcount` INT NOT NULL,
+  `upcount` INT NOT NULL,
+  `dwcount` INT NOT NULL,
+  `prev_id` INT,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`prev_id`) REFERENCES `article`(`id`)
+);
+
+CREATE TABLE comment
+(
+  `id` INT NOT NULL,
+  `content` LONGTEXT NOT NULL,
+  `ctime` DATETIME NOT NULL,
+  `mtime` DATETIME NOT NULL,
+  `upcount` INT NOT NULL,
+  `dwcount` INT NOT NULL,
+  `article_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `image_id` CHAR(64),
+  `parent_id` INT,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`article_id`) REFERENCES `article`(`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `user`(`id`),
+  FOREIGN KEY (`image_id`) REFERENCES `image`(`file_id`),
+  FOREIGN KEY (`parent_id`) REFERENCES `comment`(`id`)
+);
+
+CREATE TABLE xref_image_article
+(
+  `image_id` CHAR(64) NOT NULL,
+  `article_id` INT NOT NULL,
+  PRIMARY KEY (`image_id`, `article_id`),
+  FOREIGN KEY (`image_id`) REFERENCES `image`(`file_id`),
+  FOREIGN KEY (`article_id`) REFERENCES `article`(`id`)
+);
