@@ -3,7 +3,7 @@ SET `foreign_key_checks` = 0;
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`
 (
-  `id` INT NOT NULL,
+  `id` INT UNSIGNED NOT NULL,
   `pw` CHAR(64) NOT NULL,
   `salt` CHAR(64) NOT NULL,
   `uname` VARCHAR(127) NOT NULL,
@@ -42,8 +42,8 @@ DROP TABLE IF EXISTS `board`;
 CREATE TABLE `board`
 (
   `name` VARCHAR(127) NOT NULL,
-  `id` INT NOT NULL,
-  `admin_id` INT NOT NULL,
+  `id` INT UNSIGNED NOT NULL,
+  `admin_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`admin_id`)
     REFERENCES `user`(`id`)
@@ -55,8 +55,8 @@ CREATE TABLE `board`
 DROP TABLE IF EXISTS `xref_board_mod`;
 CREATE TABLE `xref_board_mod`
 (
-  `board_id` INT NOT NULL,
-  `mod_id` INT NOT NULL,
+  `board_id` INT UNSIGNED NOT NULL,
+  `mod_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`board_id`, `mod_id`),
   FOREIGN KEY (`board_id`)
     REFERENCES `board`(`id`)
@@ -71,15 +71,15 @@ CREATE TABLE `xref_board_mod`
 DROP TABLE IF EXISTS `article`;
 CREATE TABLE `article`
 (
-  `id` INT NOT NULL,
+  `id` INT UNSIGNED NOT NULL,
   `content` LONGTEXT NOT NULL,
   `ctime` DATETIME NOT NULL,
   `mtime` DATETIME NOT NULL,
   `title` DATETIME NOT NULL,
-  `vcount` INT NOT NULL,
-  `upcount` INT NOT NULL,
-  `dwcount` INT NOT NULL,
-  `prev_id` INT,
+  `vcount` INT UNSIGNED NOT NULL,
+  `upcount` INT UNSIGNED NOT NULL,
+  `dwcount` INT UNSIGNED NOT NULL,
+  `prev_id` INT UNSIGNED,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`prev_id`)
     REFERENCES `article`(`id`)
@@ -90,16 +90,16 @@ CREATE TABLE `article`
 DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment`
 (
-  `id` INT NOT NULL,
+  `id` INT UNSIGNED NOT NULL,
   `content` LONGTEXT NOT NULL,
   `ctime` DATETIME NOT NULL,
   `mtime` DATETIME NOT NULL,
-  `upcount` INT NOT NULL,
-  `dwcount` INT NOT NULL,
-  `article_id` INT NOT NULL,
-  `user_id` INT NOT NULL,
+  `upcount` INT UNSIGNED NOT NULL,
+  `dwcount` INT UNSIGNED NOT NULL,
+  `article_id` INT UNSIGNED NOT NULL,
+  `user_id` INT UNSIGNED NOT NULL,
   `image_id` CHAR(64),
-  `parent_id` INT,
+  `parent_id` INT UNSIGNED,
   CHECK (`upcount` >= 0),
   CHECK (`dwcount` >= 0),
   PRIMARY KEY (`id`),
@@ -123,7 +123,7 @@ DROP TABLE IF EXISTS `xref_image_article`;
 CREATE TABLE `xref_image_article`
 (
   `image_id` CHAR(64) NOT NULL,
-  `article_id` INT NOT NULL,
+  `article_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`image_id`, `article_id`),
   FOREIGN KEY (`image_id`)
     REFERENCES `image`(`file_id`)
