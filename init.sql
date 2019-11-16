@@ -16,7 +16,7 @@ CREATE TABLE `user`
   PRIMARY KEY (`id`),
   UNIQUE (`uname`),
   UNIQUE (`email`)
-);
+) DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `file`;
 CREATE TABLE `file`
@@ -25,7 +25,7 @@ CREATE TABLE `file`
   `type` VARCHAR(127) NOT NULL,
   `content` LONGBLOB NOT NULL,
   PRIMARY KEY (`id`)
-);
+) DEFAULT CHARACTER SET=latin1 COLLATE=latin1_swedish_ci;
 
 DROP TABLE IF EXISTS `image`;
 CREATE TABLE `image`
@@ -36,21 +36,20 @@ CREATE TABLE `image`
     REFERENCES `file`(`id`)
     ON UPDATE CASCADE
     ON DELETE CASCADE
-);
+) DEFAULT CHARACTER SET=latin1, COLLATE=latin1_swedish_ci;
 
 DROP TABLE IF EXISTS `board`;
 CREATE TABLE `board`
 (
-  `name` VARCHAR(127) NOT NULL,
   `id` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(127) NOT NULL,
   `admin_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`admin_id`)
     REFERENCES `user`(`id`)
     ON UPDATE CASCADE
     ON DELETE CASCADE
-
-);
+) DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `xref_board_mod`;
 CREATE TABLE `xref_board_mod`
@@ -66,7 +65,7 @@ CREATE TABLE `xref_board_mod`
     REFERENCES `user`(`id`)
     ON UPDATE CASCADE
     ON DELETE CASCADE
-);
+) DEFAULT CHARACTER SET=latin1, COLLATE=latin1_swedish_ci;
 
 DROP TABLE IF EXISTS `article`;
 CREATE TABLE `article`
@@ -85,7 +84,7 @@ CREATE TABLE `article`
     REFERENCES `article`(`id`)
     ON UPDATE CASCADE
     ON DELETE SET NULL
-);
+) DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment`
@@ -98,7 +97,7 @@ CREATE TABLE `comment`
   `dwcount` INT UNSIGNED NOT NULL,
   `article_id` INT UNSIGNED NOT NULL,
   `user_id` INT UNSIGNED NOT NULL,
-  `image_id` CHAR(64),
+  `image_id` CHAR(64) CHARACTER SET latin1 COLLATE latin1_swedish_ci,
   `parent_id` INT UNSIGNED,
   CHECK (`upcount` >= 0),
   CHECK (`dwcount` >= 0),
@@ -117,7 +116,7 @@ CREATE TABLE `comment`
     REFERENCES `comment`(`id`)
     ON UPDATE CASCADE
     ON DELETE SET NULL
-);
+) DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `xref_image_article`;
 CREATE TABLE `xref_image_article`
@@ -133,6 +132,6 @@ CREATE TABLE `xref_image_article`
     REFERENCES `article`(`id`)
     ON UPDATE CASCADE
     ON DELETE CASCADE
-);
+) DEFAULT CHARACTER SET=latin1, COLLATE=latin1_swedish_ci;
 
 SET `foreign_key_checks` = 1;
