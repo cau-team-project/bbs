@@ -100,8 +100,6 @@ CREATE TABLE `comment`
   `user_id` INT UNSIGNED NOT NULL,
   `image_id` CHAR(64) CHARACTER SET latin1 COLLATE latin1_swedish_ci,
   `parent_id` INT UNSIGNED,
-  CHECK (`upcount` >= 0),
-  CHECK (`dwcount` >= 0),
   PRIMARY KEY (`id`),
   FOREIGN KEY (`article_id`)
     REFERENCES `article`(`id`)
