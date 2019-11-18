@@ -7,6 +7,7 @@ CREATE TABLE `user`
   `pw` CHAR(64) NOT NULL,
   `salt` CHAR(64) NOT NULL,
   `uname` VARCHAR(127) NOT NULL,
+  `level` INT UNSIGNED NOT NULL,
   `bdate` DATE NOT NULL,
   `fname` VARCHAR(127) NOT NULL,
   `mname` VARCHAR(127) NOT NULL,
