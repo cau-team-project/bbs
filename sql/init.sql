@@ -4,9 +4,9 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`
 (
   `id` INT UNSIGNED NOT NULL,
+  `uname` VARCHAR(127) NOT NULL,
   `pw` CHAR(64) NOT NULL,
   `salt` CHAR(64) NOT NULL,
-  `uname` VARCHAR(127) NOT NULL,
   `level` INT UNSIGNED NOT NULL,
   `bdate` DATE NOT NULL,
   `fname` VARCHAR(127) NOT NULL,
