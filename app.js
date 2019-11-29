@@ -16,9 +16,9 @@ function sigHandler() {
 
 function exitHandler() {
   console.log('goodbye world')
-  // connection.end()
   process.exit()
 }
+
 
 process.on('exit', exitHandler);
 process.on('SIGINT', sigHandler);

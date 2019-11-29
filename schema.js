@@ -1,15 +1,6 @@
 const graphql = require('graphql')
 const { GraphQLBoolean, GraphQLID, GraphQLInt, GraphQLObjectType, GraphQLString, GraphQLSchema } = graphql
-const mysql = require('mysql')
-
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'bbs'
-});
- 
-connection.connect();
+const connection = require('./connection')
 
 const UserType = new GraphQLObjectType({
   name: 'UserType',
@@ -113,4 +104,3 @@ const rootQuery = new GraphQLObjectType({
 module.exports = new GraphQLSchema({
   query: rootQuery
 })
-
