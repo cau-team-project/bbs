@@ -1,6 +1,6 @@
 const graphql = require('graphql')
 const { GraphQLBoolean, GraphQLID, GraphQLInt, GraphQLObjectType, GraphQLString, GraphQLSchema } = graphql
-const connection = require('./connection')
+const pool = require('./pool')
 
 const UserType = new GraphQLObjectType({
   name: 'UserType',

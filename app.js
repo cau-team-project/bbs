@@ -10,12 +10,12 @@ app.use('/graphql', express_graphql({
 }))
 
 function sigHandler() {
-  console.log('signal received')
+  console.log('signal')
   process.exit()
 }
 
 function exitHandler() {
-  console.log('goodbye world')
+  console.log('goodbye')
   process.exit()
 }
 
