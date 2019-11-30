@@ -3,14 +3,14 @@ SET `foreign_key_checks` = 0;
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`
 (
-  `id` INT UNSIGNED NOT NULL,
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `uname` VARCHAR(127) NOT NULL,
   `pw` CHAR(64) NOT NULL,
   `salt` CHAR(64) NOT NULL,
   `level` INT UNSIGNED NOT NULL,
   `bdate` DATE NOT NULL,
   `fname` VARCHAR(127) NOT NULL,
-  `mname` VARCHAR(127) NOT NULL,
+  `mname` VARCHAR(127),
   `lname` VARCHAR(127) NOT NULL,
   `sex` ENUM('M','F'),
   `email` VARCHAR(127) NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE `image`
 DROP TABLE IF EXISTS `board`;
 CREATE TABLE `board`
 (
-  `id` INT UNSIGNED NOT NULL,
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(127) NOT NULL,
   `admin_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
@@ -71,7 +71,7 @@ CREATE TABLE `xref_board_mod`
 DROP TABLE IF EXISTS `article`;
 CREATE TABLE `article`
 (
-  `id` INT UNSIGNED NOT NULL,
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `content` LONGTEXT NOT NULL,
   `ctime` DATETIME NOT NULL,
   `mtime` DATETIME NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE `article`
 DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment`
 (
-  `id` INT UNSIGNED NOT NULL,
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `content` LONGTEXT NOT NULL,
   `ctime` DATETIME NOT NULL,
   `mtime` DATETIME NOT NULL,

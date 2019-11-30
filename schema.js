@@ -69,9 +69,9 @@ const rootQuery = new GraphQLObjectType({
     user: {
       type: UserType,
       args: { id: { type: GraphQLID }},
-      resolve(parent, args) {
-        console.log(args.id)
-        return {id: 1, uname: 'novice', level: '3', bdate: '2019.11.30', fname: 'john', lname: 'doe', sex: 'M', email: 'cau@cau.ac.kr'}
+      async resolve(parent, args) {
+        const res = await pool.query('SELECT * from `user` WHERE `id` = ?', [args.id])
+        return res[0][0]
       }
     },
     board: {
