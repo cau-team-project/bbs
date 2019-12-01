@@ -7,8 +7,8 @@ CREATE TABLE `user`
   `uname` VARCHAR(127) NOT NULL,
   `pw` CHAR(64) NOT NULL,
   `salt` CHAR(64) NOT NULL,
-  `level` INT UNSIGNED NOT NULL,
-  `bdate` DATE NOT NULL,
+  `level` INT UNSIGNED,
+  `bdate` DATE,
   `fname` VARCHAR(127) NOT NULL,
   `mname` VARCHAR(127),
   `lname` VARCHAR(127) NOT NULL,
@@ -46,6 +46,7 @@ CREATE TABLE `board`
   `name` VARCHAR(127) NOT NULL,
   `admin_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE (`name`),
   FOREIGN KEY (`admin_id`)
     REFERENCES `user`(`id`)
     ON UPDATE CASCADE
@@ -72,13 +73,13 @@ DROP TABLE IF EXISTS `article`;
 CREATE TABLE `article`
 (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(127) NOT NULL,
   `content` LONGTEXT NOT NULL,
-  `ctime` DATETIME NOT NULL,
-  `mtime` DATETIME NOT NULL,
-  `title` DATETIME NOT NULL,
-  `vcount` INT UNSIGNED NOT NULL,
-  `upcount` INT UNSIGNED NOT NULL,
-  `dwcount` INT UNSIGNED NOT NULL,
+  `ctime` DATETIME,
+  `mtime` DATETIME,
+  `vcount` INT UNSIGNED,
+  `upcount` INT UNSIGNED,
+  `dwcount` INT UNSIGNED,
   `prev_id` INT UNSIGNED,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`prev_id`)
@@ -92,10 +93,10 @@ CREATE TABLE `comment`
 (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `content` LONGTEXT NOT NULL,
-  `ctime` DATETIME NOT NULL,
-  `mtime` DATETIME NOT NULL,
-  `upcount` INT UNSIGNED NOT NULL,
-  `dwcount` INT UNSIGNED NOT NULL,
+  `ctime` DATETIME,
+  `mtime` DATETIME,
+  `upcount` INT UNSIGNED,
+  `dwcount` INT UNSIGNED,
   `article_id` INT UNSIGNED NOT NULL,
   `user_id` INT UNSIGNED NOT NULL,
   `image_id` CHAR(64) CHARACTER SET latin1 COLLATE latin1_swedish_ci,
