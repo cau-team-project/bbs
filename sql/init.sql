@@ -80,8 +80,13 @@ CREATE TABLE `article`
   `vcount` INT UNSIGNED,
   `upcount` INT UNSIGNED,
   `dwcount` INT UNSIGNED,
+  `board_id` INT UNSIGNED NOT NULL,
   `prev_id` INT UNSIGNED,
   PRIMARY KEY (`id`),
+  FOREIGN KEY (`board_id`)
+    REFERENCES `board`(`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
   FOREIGN KEY (`prev_id`)
     REFERENCES `article`(`id`)
     ON UPDATE CASCADE

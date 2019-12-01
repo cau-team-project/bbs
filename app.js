@@ -20,7 +20,6 @@ function exitHandler() {
   process.exit()
 }
 
-
 process.on('exit', exitHandler);
 process.on('SIGINT', sigHandler);
 process.on('SIGUSR1', sigHandler);

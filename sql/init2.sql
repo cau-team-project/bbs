@@ -45,7 +45,7 @@ VALUES(
   NULL,
   'doe',
   'M',
-  'dragon@dragonmail.com'
+  'user001@example.com'
 );
 
 INSERT INTO `board`(
@@ -67,3 +67,15 @@ SELECT
   `id`
 FROM `user`
 WHERE `uname` = 'admin';
+
+INSERT INTO `article`(
+  `title`,
+  `content`,
+  `board_id`
+)
+SELECT
+  'Welcome to our Bulletin Board System' AS `title`,
+  'This is test notice article' AS `content`,
+  `id` AS `board_id`
+FROM `board`
+WHERE `name` = 'notice';
