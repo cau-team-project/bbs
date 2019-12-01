@@ -114,10 +114,19 @@ const Mutation = new GraphQLObjectType({
         email: { type: new GraphQLNonNull(GraphQLString) }
       },
       async resolve(parent, args) {
-        const res = await pool.query("INSERT INTO `user` SET ?, salt=SHA2(RAND(), 256)",
-        [args])
-        args.id = res[0].insertId
-        return args
+        const conn = await pool.getConnection();
+        try {
+          await conn.beginTransaction()
+          const res = await conn.query("INSERT INTO `user` SET ?, salt=SHA2(RAND(), 256)", [args])
+          await conn.commit()
+          await conn.release();
+          args.id = res[0].insertId
+          return args
+        } catch(err) {
+          await conn.rollback();
+          await conn.release();
+          return err
+        }
       }
     }
   }
