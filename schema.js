@@ -1,6 +1,14 @@
 const graphql = require('graphql')
-const { GraphQLBoolean, GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLSchema } = graphql
+const { GraphQLBoolean, GraphQLEnumType, GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLSchema } = graphql
 const pool = require('./pool')
+
+const SexType = new GraphQLEnumType({
+  name: 'Sex',
+  values: {
+    M: { value: 0 },
+    F: { value: 1 }
+  }
+})
 
 const UserType = new GraphQLObjectType({
   name: 'UserType',
@@ -12,7 +20,7 @@ const UserType = new GraphQLObjectType({
     fname: { type: new GraphQLNonNull(GraphQLString) },
     mname: { type: GraphQLString },
     lname: { type: new GraphQLNonNull(GraphQLString) },
-    sex: { type: GraphQLString },
+    sex: { type: SexType },
     email: { type: new GraphQLNonNull(GraphQLString) }
   })
 })
@@ -110,7 +118,9 @@ const Mutation = new GraphQLObjectType({
         uname: { type: new GraphQLNonNull(GraphQLString) },
         pw: { type: new GraphQLNonNull(GraphQLString) },
         fname: { type: new GraphQLNonNull(GraphQLString) },
+        mname: { type: GraphQLString },
         lname: { type: new GraphQLNonNull(GraphQLString) },
+        sex: { type: SexType },
         email: { type: new GraphQLNonNull(GraphQLString) }
       },
       async resolve(parent, args) {
