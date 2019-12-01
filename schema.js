@@ -21,7 +21,14 @@ const UserType = new GraphQLObjectType({
     mname: { type: GraphQLString },
     lname: { type: new GraphQLNonNull(GraphQLString) },
     sex: { type: SexType },
-    email: { type: new GraphQLNonNull(GraphQLString) }
+    email: { type: new GraphQLNonNull(GraphQLString) },
+    article_list: {
+      type: new GraphQLList(ArticleType),
+      async resolve(obj, args, context, info) {
+        const res = await pool.query('SELECT * from `article` WHERE `user_id` = ?', [obj.id])
+        return res[0]
+      }
+    }
   })
 })
 
@@ -31,7 +38,41 @@ const BoardType = new GraphQLObjectType({
     id: { type: new GraphQLNonNull(GraphQLID) },
     name: { type: new GraphQLNonNull(GraphQLString) },
     admin_id: { type: new GraphQLNonNull(GraphQLID) },
-    mod_id_list: { type: new GraphQLList(GraphQLID) }
+    admin: {
+      type: UserType,
+      async resolve(obj, args, context, info) {
+        const res = await pool.query('SELECT * from `user` WHERE `id` = ?', [obj.admin_id])
+        return res[0][0]
+      }
+    },
+    mod_id_list: {
+      type: new GraphQLList(GraphQLID),
+      async resolve(obj, args, context, info) {
+        const res = await pool.query('SELECT * from `xref_board_mod` WHERE `board_id` = ?', [args.id])
+        return res[0].map(xref => xref.mod_id)
+      }
+    },
+    mod_list: {
+      type: new GraphQLList(UserType),
+      async resolve(obj, args, context, info) {
+        const res = await pool.query('SELECT * from `xref_board_mod` WHERE `board_id` = ?', [args.id])
+        return res[0]
+      }
+    },
+    article_id_list: {
+      type: new GraphQLList(GraphQLID),
+      async resolve(obj, args, context, info) {
+        const res = await pool.query("SELECT * from `article` WHERE `board_id` = ? ORDER BY `ctime` DESC", [obj.id])
+        return res[0].map(article => article.id)
+      }
+    },
+    article_list: {
+      type: new GraphQLList(ArticleType),
+      async resolve(obj, args, context, info) {
+        const res = await pool.query("SELECT * from `article` WHERE `board_id` = ? ORDER BY `ctime`", [obj.id])
+        return res[0]
+      }
+    },
   })
 })
 
@@ -46,13 +87,35 @@ const ArticleType = new GraphQLObjectType({
     vcount: { type: GraphQLInt },
     upcount: { type: GraphQLInt },
     dwcount: { type: GraphQLInt },
-    board_id: { type: GraphQLID },
-    prev_id: { type: GraphQLID },
-    prev_article: {
-      type: ArticleType,
-      async resolve(parent, args) {
-        const res = await pool.query('SELECT * from `article` WHERE `prev_id` = ?', [parent.prev_id])
+    user_id: { type: new GraphQLNonNull(GraphQLID) },
+    user: {
+      type: UserType,
+      async resolve(obj, args, context, info) {
+        const res = await pool.query('SELECT * from `user` WHERE `id` = ?', [obj.user_id])
         return res[0][0]
+      }
+    },
+    board_id: { type: new GraphQLNonNull(GraphQLID) },
+    prev_id: { type: GraphQLID },
+    prev: {
+      type: ArticleType,
+      async resolve(obj, args, context, info) {
+        const res = await pool.query('SELECT * from `article` WHERE `prev_id` = ?', [obj.prev_id])
+        return res[0][0]
+      }
+    },
+    comment_id_list: {
+      type: new GraphQLList(CommentType),
+      async resolve(obj, args, context, info) {
+        const res = await pool.query('SELECT * from `comment` WHERE `article_id` = ?', [obj.id])
+        return res[0].map((comment) => comment.id)
+      }
+    },
+    comment_list: {
+      type: new GraphQLList(CommentType),
+      async resolve(obj, args, context, info) {
+        const res = await pool.query('SELECT * from `comment` WHERE `article_id` = ?', [obj.id])
+        return res[0]
       }
     }
   })
@@ -67,42 +130,52 @@ const CommentType = new GraphQLObjectType({
     mtime: { type: GraphQLString },
     upcount: { type: GraphQLInt },
     dwcount: { type: GraphQLInt },
-    article_id: { type: new GraphQLNonNull(GraphQLID) },
     user_id: { type: new GraphQLNonNull(GraphQLID) },
+    article_id: { type: new GraphQLNonNull(GraphQLID) },
+    article: {
+      type: ArticleType,
+      async resolve(obj, args, context, info) {
+        const res = await pool.query('SELECT * from `article` WHERE `id` = ?', [obj.article_id])
+        return res[0][0]
+      }
+    },
     image_id: { type: GraphQLID },
-    parent_id: { type: GraphQLID }
+    parent_id: { type: GraphQLID },
+    parent: {
+      type: CommentType,
+      async resolve(obj, args, context, info) {
+        if(obj.parent_id === null)
+          return null
+        const res = await pool.query('SELECT * from `comment` WHERE `id` = ?', [obj.parent_id])
+        return res[0][0]
+      }
+    }
   })
 })
 
-const rootQuery = new GraphQLObjectType({
+const RootQueryType = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: () => ({
     user: {
       type: UserType,
       args: { id: { type: GraphQLID }},
-      async resolve(parent, args) {
+      async resolve(obj, args, context, info) {
         const res = await pool.query('SELECT * from `user` WHERE `id` = ?', [args.id])
-        if(res[0].length !== 1)
-          return null
         return res[0][0]
       }
     },
     board: {
       type: BoardType,
       args: { id: { type: GraphQLID }},
-      async resolve(parent, args) {
-        let res = await pool.query('SELECT * from `board` WHERE `id` = ?', [args.id])
-        const xref_board_mod_res = await pool.query('SELECT * from `xref_board_mod` WHERE `board_id` = ?', [args.id])
-        if(res[0].length !== 1)
-          return null
-        res[0][0].mod_id_list = xref_board_mod_res[0].map((xref) => { return xref.mod_id })
+      async resolve(obj, args, context, info) {
+        const res = await pool.query('SELECT * from `board` WHERE `id` = ?', [args.id])
         return res[0][0]
       }
     },
     article: {
       type: ArticleType,
       args: { id: { type: GraphQLID }},
-      async resolve(parent, args) {
+      async resolve(obj, args, context, info) {
         const res = await pool.query('SELECT * from `article` WHERE `id` = ?', [args.id])
         return res[0][0]
       }
@@ -110,18 +183,16 @@ const rootQuery = new GraphQLObjectType({
     comment: {
       type: CommentType,
       args: { id: { type: GraphQLID }},
-      async resolve(parent, args) {
+      async resolve(obj, args, context, info) {
         const res = await pool.query('SELECT * from `comment` WHERE `id` = ?', [args.id])
-        if(res[0].length !== 1)
-          return null
         return res[0][0]
       }
     }
   })
 })
 
-const Mutation = new GraphQLObjectType({
-  name: 'Mutation',
+const MutationType = new GraphQLObjectType({
+  name: 'MutationType',
   fields: {
     insertUser: {
       type: UserType,
@@ -134,11 +205,11 @@ const Mutation = new GraphQLObjectType({
         sex: { type: SexType },
         email: { type: new GraphQLNonNull(GraphQLString) }
       },
-      async resolve(parent, args) {
+      async resolve(obj, args, context, info) {
         const conn = await pool.getConnection()
         try {
           await conn.beginTransaction()
-          const res = await conn.query("INSERT INTO `user` SET ?, `salt`=SHA2(RAND(), 256)", [args])
+          const res = await conn.query("INSERT INTO `user` SET ?, `salt` = SHA2(RAND(), 256)", [args])
           await conn.commit()
           await conn.release()
           args.id = res[0].insertId
@@ -155,9 +226,9 @@ const Mutation = new GraphQLObjectType({
       args: {
         name: { type: new GraphQLNonNull(GraphQLString) },
         admin_id: { type: new GraphQLNonNull(GraphQLID) },
-        mod_id_list: { type: new GraphQLList(GraphQLID) }
+        mod_id_list: { type: new GraphQLList(GraphQLID) },
       },
-      async resolve(parent, args) {
+      async resolve(obj, args, context, info) {
         args.mod_id_list = args.mod_id_list || []
         const { ['mod_id_list']: mod_id_list, ...board_args } = args
         const conn = await pool.getConnection()
@@ -185,9 +256,10 @@ const Mutation = new GraphQLObjectType({
         title: { type: new GraphQLNonNull(GraphQLString) },
         content: { type: new GraphQLNonNull(GraphQLString) },
         prev_id: { type: GraphQLID },
+        user_id: { type: new GraphQLNonNull(GraphQLID) },
         board_id: { type: new GraphQLNonNull(GraphQLID) },
       },
-      async resolve(parent, args) {
+      async resolve(obj, args, context, info) {
         const conn = await pool.getConnection()
         try {
           await conn.beginTransaction()
@@ -207,6 +279,6 @@ const Mutation = new GraphQLObjectType({
 })
 
 module.exports = new GraphQLSchema({
-  query: rootQuery,
-  mutation: Mutation
+  query: RootQueryType,
+  mutation: MutationType
 })

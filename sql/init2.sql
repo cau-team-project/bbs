@@ -36,7 +36,7 @@ INSERT INTO `user` (
   `email`
 )
 VALUES(
-  'user001',
+  'testuser',
   SHA2(RAND(), 256),
   SHA2('salt', 256),
   3,
@@ -45,18 +45,8 @@ VALUES(
   NULL,
   'doe',
   'M',
-  'user001@example.com'
+  'testuser@example.com'
 );
-
-INSERT INTO `board`(
-  `name`,
-  `admin_id`
-)
-SELECT
-  'free' AS `name`,
-  `id`
-FROM `user`
-WHERE `uname` = 'admin';
 
 INSERT INTO `board`(
   `name`,
@@ -68,14 +58,62 @@ SELECT
 FROM `user`
 WHERE `uname` = 'admin';
 
+INSERT INTO `board`(
+  `name`,
+  `admin_id`
+)
+SELECT
+  'free' AS `name`,
+  `id`
+FROM `user`
+WHERE `uname` = 'admin';
+
 INSERT INTO `article`(
   `title`,
   `content`,
+  `user_id`,
   `board_id`
 )
 SELECT
-  'Welcome to our Bulletin Board System' AS `title`,
+  'welcome to our bulletin board system' AS `title`,
   'This is test notice article' AS `content`,
-  `id` AS `board_id`
-FROM `board`
-WHERE `name` = 'notice';
+  (SELECT `id` FROM `user` WHERE `uname` = 'admin') AS `user_id`,
+  (SELECT `id` FROM `board` WHERE `name` = 'notice') AS `board_id`
+;
+
+INSERT INTO `article`(
+  `title`,
+  `content`,
+  `user_id`,
+  `board_id`
+)
+SELECT
+  'This is free board' AS `title`,
+  'You can write any articles here' AS `content`,
+  (SELECT `id` FROM `user` WHERE `uname` = 'admin') AS `user_id`,
+  (SELECT `id` FROM `board` WHERE `name` = 'free') AS `board_id`
+;
+
+INSERT INTO `article`(
+  `title`,
+  `content`,
+  `user_id`,
+  `board_id`
+)
+SELECT
+  'Hello' AS `title`,
+  'World!' AS `content`,
+  (SELECT `id` FROM `user` WHERE `uname` = 'testuser') AS `user_id`,
+  (SELECT `id` FROM `board` WHERE `name` = 'free') AS `board_id`
+;
+
+INSERT INTO `comment`(
+  `content`,
+  `user_id`,
+  `article_id`
+)
+SELECT
+  'Very useful article!' AS `content`,
+  (SELECT `id` FROM `user` WHERE `uname` = 'admin') AS `user_id`,
+  (SELECT `id` FROM `article` WHERE `user_id` = 1 LIMIT 1) AS `article_id`
+;

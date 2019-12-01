@@ -75,14 +75,19 @@ CREATE TABLE `article`
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(127) NOT NULL,
   `content` LONGTEXT NOT NULL,
-  `ctime` DATETIME,
+  `ctime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `mtime` DATETIME,
   `vcount` INT UNSIGNED,
   `upcount` INT UNSIGNED,
   `dwcount` INT UNSIGNED,
+  `user_id` INT UNSIGNED NOT NULL,
   `board_id` INT UNSIGNED NOT NULL,
   `prev_id` INT UNSIGNED,
   PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`)
+    REFERENCES `user`(`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
   FOREIGN KEY (`board_id`)
     REFERENCES `board`(`id`)
     ON UPDATE CASCADE
@@ -98,14 +103,14 @@ CREATE TABLE `comment`
 (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `content` LONGTEXT NOT NULL,
-  `ctime` DATETIME,
+  `ctime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `mtime` DATETIME,
   `upcount` INT UNSIGNED,
   `dwcount` INT UNSIGNED,
-  `article_id` INT UNSIGNED NOT NULL,
   `user_id` INT UNSIGNED NOT NULL,
-  `image_id` CHAR(64) CHARACTER SET latin1 COLLATE latin1_swedish_ci,
   `parent_id` INT UNSIGNED,
+  `article_id` INT UNSIGNED NOT NULL,
+  `image_id` CHAR(64) CHARACTER SET latin1 COLLATE latin1_swedish_ci,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`article_id`)
     REFERENCES `article`(`id`)
