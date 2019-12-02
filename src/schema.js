@@ -268,12 +268,14 @@ const MutationType = new GraphQLObjectType({
         try {
           await conn.beginTransaction()
           args.sex = args.sex == 0 ? 'M' : 'F'
-          const res = await conn.query("INSERT INTO `user` SET ?, `salt` = SHA2(RAND(), 256)", [args])
+          let res = await conn.query("INSERT INTO `user` SET ?, `salt` = SHA2(RAND(), 256)", [args])
           await conn.commit()
           await conn.release()
-          args.id = res[0].insertId
-          args.sex = args.sex == 'M' ? 0 : 1
-          return args
+          if(res[0].affectedRows !== 1)
+            return null
+          res = await pool.query('SELECT * FROM `user` WHERE `id` = ?', [res[0].insertId])
+          res[0][0].sex = res.sex == 'M' ? 0 : 1
+          return res[0][0]
         } catch(err) {
           await conn.rollback()
           await conn.release()
@@ -401,11 +403,13 @@ const MutationType = new GraphQLObjectType({
         const conn = await pool.getConnection()
         try {
           await conn.beginTransaction()
-          const res = await conn.query("INSERT INTO `article` SET ?", [args])
+          let res = await conn.query("INSERT INTO `article` SET ?", [args])
           await conn.commit()
           await conn.release()
-          args.id = res[0].insertId
-          return args
+          if(res[0].affectedRows !== 1)
+            return null
+          res = await pool.query('SELECT * FROM `article` WHERE `id` = ?', [res[0].insertId])
+          return res[0][0]
         } catch(err) {
           await conn.rollback()
           await conn.release()
