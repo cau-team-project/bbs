@@ -114,6 +114,19 @@ INSERT INTO `comment`(
 )
 SELECT
   'Very useful article!' AS `content`,
-  (SELECT `id` FROM `user` WHERE `uname` = 'admin') AS `user_id`,
+  (SELECT `id` FROM `user` WHERE `uname` = 'testuser') AS `user_id`,
   (SELECT `id` FROM `article` WHERE `user_id` = 1 LIMIT 1) AS `article_id`
+;
+
+INSERT INTO `comment`(
+  `content`,
+  `user_id`,
+  `article_id`,
+  `parent_id`
+)
+SELECT
+  'Thank you!' AS `content`,
+  (SELECT `id` FROM `user` WHERE `uname` = 'admin') AS `user_id`,
+  (SELECT `id` FROM `article` WHERE `user_id` = 1 LIMIT 1) AS `article_id`,
+  (SELECT `id` FROM `comment` WHERE `content` = 'Very useful article' LIMIT 1) AS `parent_id`
 ;
