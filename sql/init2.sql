@@ -16,11 +16,36 @@ VALUES(
   SHA2('salt', 256),
   9,
   CURDATE(),
-  'admin',
+  'Dariel',
   NULL,
-  'mr',
+  'Curry',
   'M',
   'admin@example.com'
+);
+
+INSERT INTO `user` (
+  `uname`,
+  `pw`,
+  `salt`,
+  `level`,
+  `bdate`,
+  `fname`,
+  `mname`,
+  `lname`,
+  `sex`,
+  `email`
+)
+VALUES(
+  'moderator',
+  SHA2(RAND(), 256),
+  SHA2('salt', 256),
+  8,
+  CURDATE(),
+  'Elizabeth',
+  NULL,
+  'Harris',
+  'F',
+  'moderator@example.com'
 );
 
 INSERT INTO `user` (
@@ -41,9 +66,9 @@ VALUES(
   SHA2('salt', 256),
   3,
   CURDATE(),
-  'john',
+  'Levi',
   NULL,
-  'doe',
+  'Lawson',
   'M',
   'testuser@example.com'
 );
@@ -67,6 +92,24 @@ SELECT
   `id`
 FROM `user`
 WHERE `uname` = 'admin';
+
+INSERT INTO `xref_board_mod`(
+  `board_id`,
+  `mod_id`
+)
+SELECT
+  (SELECT `id` FROM `board` WHERE `name` = 'notice') AS `board_id`,
+  (SELECT `id` FROM `user` WHERE `uname` = 'moderator') AS `mod_id`
+;
+
+INSERT INTO `xref_board_mod`(
+  `board_id`,
+  `mod_id`
+)
+SELECT
+  (SELECT `id` FROM `board` WHERE `name` = 'free') AS `board_id`,
+  (SELECT `id` FROM `user` WHERE `uname` = 'moderator') AS `mod_id`
+;
 
 INSERT INTO `article`(
   `title`,

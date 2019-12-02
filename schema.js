@@ -25,56 +25,56 @@ const UserType = new GraphQLObjectType({
     admin_board_id_list: {
       type: new GraphQLList(GraphQLID),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT `id` from `board` WHERE `admin_id` = ?', [obj.id])
+        const res = await pool.query('SELECT `id` FROM `board` WHERE `admin_id` = ?', [obj.id])
         return res[0].map(board => board.id)
       }
     },
     admin_board_list: {
       type: new GraphQLList(BoardType),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `board` WHERE `admin_id` = ?', [obj.id])
+        const res = await pool.query('SELECT * FROM `board` WHERE `admin_id` = ?', [obj.id])
         return res[0]
       }
     },
     mod_board_id_list: {
       type: new GraphQLList(GraphQLID),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT `board_id` from `xref_board_mod` WHERE `mod_id` = ?', [obj.id])
+        const res = await pool.query('SELECT `board_id` FROM `xref_board_mod` WHERE `mod_id` = ?', [obj.id])
         return res[0].map(board => board.id)
       }
-    },/*
+    },
     mod_board_list: {
       type: new GraphQLList(BoardType),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT `board_id` from `xref_board_mod` WHERE `mod_id` = ?', [obj.id])
+        const res = await pool.query('SELECT * FROM `board` JOIN `xref_board_mod` ON `board`.`id` = `xref_board_mod`.`board_id` WHERE `xref_board_mod`.`mod_id` = ?', [obj.id])
         return res[0]
       }
-    },*/
+    },
     article_id_list: {
       type: new GraphQLList(GraphQLID),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT `id` from `article` WHERE `user_id` = ?', [obj.id])
+        const res = await pool.query('SELECT `id` FROM `article` WHERE `user_id` = ?', [obj.id])
         return res[0].map(article => article.id)
       }
     },
     article_list: {
       type: new GraphQLList(ArticleType),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `article` WHERE `user_id` = ?', [obj.id])
+        const res = await pool.query('SELECT * FROM `article` WHERE `user_id` = ?', [obj.id])
         return res[0]
       }
     },
     comment_id_list: {
       type: new GraphQLList(GraphQLID),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT `id` from `comment` WHERE `user_id` = ?', [obj.id])
+        const res = await pool.query('SELECT `id` FROM `comment` WHERE `user_id` = ?', [obj.id])
         return res[0].map(comment => comment.id)
       }
     },
     comment_list: {
       type: new GraphQLList(CommentType),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `comment` WHERE `user_id` = ?', [obj.id])
+        const res = await pool.query('SELECT * FROM `comment` WHERE `user_id` = ?', [obj.id])
         return res[0]
       }
     }
@@ -90,35 +90,35 @@ const BoardType = new GraphQLObjectType({
     admin: {
       type: UserType,
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `user` WHERE `id` = ?', [obj.admin_id])
+        const res = await pool.query('SELECT * FROM `user` WHERE `id` = ?', [obj.admin_id])
         return res[0][0]
       }
     },
     mod_id_list: {
       type: new GraphQLList(GraphQLID),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `xref_board_mod` WHERE `board_id` = ?', [args.id])
+        const res = await pool.query('SELECT * FROM `xref_board_mod` WHERE `board_id` = ?', [args.id])
         return res[0].map(xref => xref.mod_id)
       }
     },
     mod_list: {
       type: new GraphQLList(UserType),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `xref_board_mod` WHERE `board_id` = ?', [args.id])
+        const res = await pool.query('SELECT * FROM `xref_board_mod` WHERE `board_id` = ?', [args.id])
         return res[0]
       }
     },
     article_id_list: {
       type: new GraphQLList(GraphQLID),
       async resolve(obj, args, context, info) {
-        const res = await pool.query("SELECT `id` from `article` WHERE `board_id` = ? ORDER BY `ctime` DESC", [obj.id])
+        const res = await pool.query("SELECT `id` FROM `article` WHERE `board_id` = ? ORDER BY `ctime` DESC", [obj.id])
         return res[0].map(article => article.id)
       }
     },
     article_list: {
       type: new GraphQLList(ArticleType),
       async resolve(obj, args, context, info) {
-        const res = await pool.query("SELECT * from `article` WHERE `board_id` = ? ORDER BY `ctime`", [obj.id])
+        const res = await pool.query("SELECT * FROM `article` WHERE `board_id` = ? ORDER BY `ctime`", [obj.id])
         return res[0]
       }
     },
@@ -140,7 +140,7 @@ const ArticleType = new GraphQLObjectType({
     user: {
       type: UserType,
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `user` WHERE `id` = ?', [obj.user_id])
+        const res = await pool.query('SELECT * FROM `user` WHERE `id` = ?', [obj.user_id])
         return res[0][0]
       }
     },
@@ -149,21 +149,21 @@ const ArticleType = new GraphQLObjectType({
     prev: {
       type: ArticleType,
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `article` WHERE `prev_id` = ?', [obj.prev_id])
+        const res = await pool.query('SELECT * FROM `article` WHERE `prev_id` = ?', [obj.prev_id])
         return res[0][0]
       }
     },
     comment_id_list: {
       type: new GraphQLList(CommentType),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT `id` from `comment` WHERE `article_id` = ?', [obj.id])
+        const res = await pool.query('SELECT `id` FROM `comment` WHERE `article_id` = ?', [obj.id])
         return res[0].map((comment) => comment.id)
       }
     },
     comment_list: {
       type: new GraphQLList(CommentType),
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `comment` WHERE `article_id` = ?', [obj.id])
+        const res = await pool.query('SELECT * FROM `comment` WHERE `article_id` = ?', [obj.id])
         return res[0]
       }
     }
@@ -183,7 +183,7 @@ const CommentType = new GraphQLObjectType({
     user: {
       type: UserType,
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `user` WHERE `id` = ?', [obj.user_id])
+        const res = await pool.query('SELECT * FROM `user` WHERE `id` = ?', [obj.user_id])
         return res[0][0]
       }
     },
@@ -191,7 +191,7 @@ const CommentType = new GraphQLObjectType({
     article: {
       type: ArticleType,
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `article` WHERE `id` = ?', [obj.article_id])
+        const res = await pool.query('SELECT * FROM `article` WHERE `id` = ?', [obj.article_id])
         return res[0][0]
       }
     },
@@ -202,7 +202,7 @@ const CommentType = new GraphQLObjectType({
       async resolve(obj, args, context, info) {
         if(obj.parent_id === null)
           return null
-        const res = await pool.query('SELECT * from `comment` WHERE `id` = ?', [obj.parent_id])
+        const res = await pool.query('SELECT * FROM `comment` WHERE `id` = ?', [obj.parent_id])
         return res[0][0]
       }
     }
@@ -216,7 +216,7 @@ const RootQueryType = new GraphQLObjectType({
       type: UserType,
       args: { id: { type: GraphQLID }},
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `user` WHERE `id` = ?', [args.id])
+        const res = await pool.query('SELECT * FROM `user` WHERE `id` = ?', [args.id])
         return res[0][0]
       }
     },
@@ -224,7 +224,7 @@ const RootQueryType = new GraphQLObjectType({
       type: BoardType,
       args: { id: { type: GraphQLID }},
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `board` WHERE `id` = ?', [args.id])
+        const res = await pool.query('SELECT * FROM `board` WHERE `id` = ?', [args.id])
         return res[0][0]
       }
     },
@@ -232,7 +232,7 @@ const RootQueryType = new GraphQLObjectType({
       type: ArticleType,
       args: { id: { type: GraphQLID }},
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `article` WHERE `id` = ?', [args.id])
+        const res = await pool.query('SELECT * FROM `article` WHERE `id` = ?', [args.id])
         return res[0][0]
       }
     },
@@ -240,7 +240,7 @@ const RootQueryType = new GraphQLObjectType({
       type: CommentType,
       args: { id: { type: GraphQLID }},
       async resolve(obj, args, context, info) {
-        const res = await pool.query('SELECT * from `comment` WHERE `id` = ?', [args.id])
+        const res = await pool.query('SELECT * FROM `comment` WHERE `id` = ?', [args.id])
         return res[0][0]
       }
     }
