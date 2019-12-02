@@ -13,7 +13,7 @@ const SexType = new GraphQLEnumType({
 const UserType = new GraphQLObjectType({
   name: 'UserType',
   fields: () => ({
-    id: { type: GraphQLID },
+    id: { type: new GraphQLNonNull(GraphQLID) },
     uname: { type: new GraphQLNonNull(GraphQLString) },
     level: { type: GraphQLInt },
     bdate: { type: GraphQLString },
@@ -141,6 +141,7 @@ const ArticleType = new GraphQLObjectType({
       type: UserType,
       async resolve(obj, args, context, info) {
         const res = await pool.query('SELECT * FROM `user` WHERE `id` = ?', [obj.user_id])
+        res[0][0].sex = res[0][0].sex == 'M' ? 0 : 1
         return res[0][0]
       }
     },
@@ -214,15 +215,16 @@ const RootQueryType = new GraphQLObjectType({
   fields: () => ({
     user: {
       type: UserType,
-      args: { id: { type: GraphQLID }},
+      args: { id: { type: new GraphQLNonNull(GraphQLID) }},
       async resolve(obj, args, context, info) {
         const res = await pool.query('SELECT * FROM `user` WHERE `id` = ?', [args.id])
+        res[0][0].sex = res[0][0].sex == 'M' ? 0 : 1
         return res[0][0]
       }
     },
     board: {
       type: BoardType,
-      args: { id: { type: GraphQLID }},
+      args: { id: { type: new GraphQLNonNull(GraphQLID) }},
       async resolve(obj, args, context, info) {
         const res = await pool.query('SELECT * FROM `board` WHERE `id` = ?', [args.id])
         return res[0][0]
@@ -230,7 +232,7 @@ const RootQueryType = new GraphQLObjectType({
     },
     article: {
       type: ArticleType,
-      args: { id: { type: GraphQLID }},
+      args: { id: { type: new GraphQLNonNull(GraphQLID) }},
       async resolve(obj, args, context, info) {
         const res = await pool.query('SELECT * FROM `article` WHERE `id` = ?', [args.id])
         return res[0][0]
@@ -238,7 +240,7 @@ const RootQueryType = new GraphQLObjectType({
     },
     comment: {
       type: CommentType,
-      args: { id: { type: GraphQLID }},
+      args: { id: { type: new GraphQLNonNull(GraphQLID) }},
       async resolve(obj, args, context, info) {
         const res = await pool.query('SELECT * FROM `comment` WHERE `id` = ?', [args.id])
         return res[0][0]
@@ -265,10 +267,68 @@ const MutationType = new GraphQLObjectType({
         const conn = await pool.getConnection()
         try {
           await conn.beginTransaction()
+          args.sex = args.sex == 0 ? 'M' : 'F'
           const res = await conn.query("INSERT INTO `user` SET ?, `salt` = SHA2(RAND(), 256)", [args])
           await conn.commit()
           await conn.release()
           args.id = res[0].insertId
+          args.sex = args.sex == 'M' ? 0 : 1
+          return args
+        } catch(err) {
+          await conn.rollback()
+          await conn.release()
+          return err
+        }
+      }
+    },
+    updateUser: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        uname: { type: GraphQLString },
+        pw: { type: GraphQLString },
+        fname: { type: GraphQLString },
+        mname: { type: GraphQLString },
+        lname: { type: GraphQLString },
+        sex: { type: SexType },
+        email: { type: GraphQLString }
+      },
+      async resolve(obj, args, context, info) {
+        const conn = await pool.getConnection()
+        try {
+          await conn.beginTransaction()
+          args.sex = args.sex == 0 ? 'M' : 'F'
+          const { ['id']: user_id, ...user_args } = args
+          let res = await conn.query("UPDATE `user` SET ?, `salt` = SHA2(RAND(), 256) WHERE `id` = ?", [user_args, user_id])
+          await conn.commit()
+          await conn.release()
+          if(res[0].affectedRows !== 1)
+            return null
+          res = await pool.query('SELECT * FROM `user` WHERE `id` = ?', [args.id])
+          res[0][0].sex = res.sex == 'M' ? 0 : 1
+          return res[0][0]
+        } catch(err) {
+          await conn.rollback()
+          await conn.release()
+          return err
+        }
+      }
+    },
+    deleteUser: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      async resolve(obj, args, context, info) {
+        const conn = await pool.getConnection()
+        try {
+          await conn.beginTransaction()
+          const res = await conn.query("DELETE FROM `user` WHERE `id` = ?", [args.id])
+          await conn.commit()
+          await conn.release()
+          if(res[0].affectedRows !== 1)
+            return null
+          args.sex = args.sex == 'M' ? 0 : 1
           return args
         } catch(err) {
           await conn.rollback()
@@ -306,6 +366,28 @@ const MutationType = new GraphQLObjectType({
         }
       }
     },
+    deleteBoard: {
+      type: BoardType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      async resolve(obj, args, context, info) {
+        const conn = await pool.getConnection()
+        try {
+          await conn.beginTransaction()
+          const res = await conn.query("DELETE FROM `board` WHERE `id` = ?", [args.id])
+          await conn.commit()
+          await conn.release()
+          if(res[0].affectedRows !== 1)
+            return null
+          return args
+        } catch(err) {
+          await conn.rollback()
+          await conn.release()
+          return err
+        }
+      }
+    },
     insertArticle: {
       type: ArticleType,
       args: {
@@ -323,6 +405,28 @@ const MutationType = new GraphQLObjectType({
           await conn.commit()
           await conn.release()
           args.id = res[0].insertId
+          return args
+        } catch(err) {
+          await conn.rollback()
+          await conn.release()
+          return err
+        }
+      }
+    },
+    deleteArticle: {
+      type: ArticleType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      async resolve(obj, args, context, info) {
+        const conn = await pool.getConnection()
+        try {
+          await conn.beginTransaction()
+          const res = await conn.query("DELETE FROM `article` WHERE `id` = ?", [args.id])
+          await conn.commit()
+          await conn.release()
+          if(res[0].affectedRows !== 1)
+            return null
           return args
         } catch(err) {
           await conn.rollback()

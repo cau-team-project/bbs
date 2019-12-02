@@ -11,7 +11,7 @@ app.use('/graphql', express_graphql({
 }))
 
 function sigHandler() {
-  console.log('signal')
+  console.log('signal received')
   process.exit()
 }
 
