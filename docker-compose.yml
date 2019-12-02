@@ -1,7 +1,7 @@
 version: '3'
 services:
-  mariadb:
-    container_name: mariadb
+  bbs-mariadb:
+    container_name: bbs-mariadb
     image: mariadb
     environment:
       MYSQL_DATABASE: bbs
@@ -10,3 +10,20 @@ services:
       - 3306:3306
     volumes:
       - ./sql:/docker-entrypoint-initdb.d 
+    networks:
+      - bbs-net
+
+  bbs-api:
+    container_name: bbs-api
+    build: .
+    image: bbs-api
+    depends_on:
+      - bbs-mariadb
+    networks:
+      - bbs-net
+    ports:
+      - 8000:8000
+
+networks:
+  bbs-net:
+    driver: bridge

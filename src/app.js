@@ -3,7 +3,7 @@ const express = require('express')
 const express_graphql = require('express-graphql')
 
 const app = express()
-const PORT = 8001
+const PORT = 8000
 
 app.use('/graphql', express_graphql({ 
   schema,
